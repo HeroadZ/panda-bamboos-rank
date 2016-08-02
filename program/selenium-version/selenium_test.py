@@ -1,11 +1,11 @@
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 import csv
+import re
 import time
 import pickle
 import os.path
-import math
-import requests
 
 #得到正在直播的最大页数
 def getMaxPages(driver):
@@ -32,15 +32,32 @@ def getBambooAndId(roomNumberList, driver):
 	idList = []
 	bambooList = []
 	for roomNumber in roomNumberList:
-		url = "http://www.panda.tv/api_room?roomid=" + roomNumber
-		print(roomNumber)
-		info = (requests.get(url)).json()
-		anchorId = info['data']['hostinfo']['name']
-		bamboos = info['data']['hostinfo']['bamboos']
+		anchorUrl = "http://www.panda.tv/" + roomNumber
+		driver.get(anchorUrl)
+		time.sleep(0.5)
+		try:
+			anchorId = driver.find_element_by_css_selector("body .room-head-info-hostname").get_attribute("innerHTML")
+			bamboos = driver.find_element_by_css_selector("body .room-bamboo-num").get_attribute("innerHTML")
+		except NoSuchElementException:
+			anchorId = "none"
+			bamboos = "none"
+			print("not found in " + roomNumber)
 		idList.append(anchorId)
-		bambooList.append(math.ceil(int(bamboos)/1000))
+		bambooList.append(bamboos)
 	return idList, bambooList
 
+#将得到的竹子进行单位统一
+def bambooRank(bambooList):
+	bambooRankList = []
+	for item in bambooList:
+		multiFactor = 1000
+		if('mm' in item):
+			multiFactor = 1
+		if(item == "none"):
+			item = "0"
+		tmp = re.findall('\d+[\.]?\d*', item)[0]
+		bambooRankList.append(float(tmp) * multiFactor)
+	return bambooRankList
 
 #记录爬取的房间号
 def recordRoomList(roomNumberList):
@@ -55,7 +72,6 @@ def readRoomList():
 	f.close()
 	return roomNumberList
 
-#保存为csv文件
 def saveResult(result):
 	with open('panda_bamboos_rank.csv', 'w+', newline='') as f:
 		writer = csv.writer(f)
@@ -63,7 +79,6 @@ def saveResult(result):
 		writer.writerows(result)
 	f.closed
 
-#增量判断
 def incrementRoom(roomNumberList):
 	if(not os.path.isfile("roomList.pickle")):
 		recordRoomList(roomNumberList)
@@ -83,17 +98,18 @@ def main():
 
 	driver = webdriver.Chrome('chromedriver.exe')
 	driver.get(listUrl)
+	driver.implicitly_wait(1)
+
 	# maxPages = getMaxPages(driver)
 	maxPages = 2
 	roomNumberList = getAllRoom(maxPages, driver)
-	driver.close()
-
 	roomNumberList = incrementRoom(roomNumberList)
 	idList, bambooList = getBambooAndId(roomNumberList, driver)
+	driver.close()
 
-	mixed = sorted(zip(bambooList, idList, roomNumberList), reverse = True)
+	bambooRankList = bambooRank(bambooList)
+	mixed = sorted(zip(bambooRankList, idList, roomNumberList), reverse = True)
 	saveResult(mixed)
-	print("done")
 
 if __name__ == '__main__':
 	main()
