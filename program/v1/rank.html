@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta   name="viewport"
+            content="width=device-width,height=device-height,initial-scale=1.0">
+	<title>熊猫竹子Top20</title>
+	<script src="https://cdn.bootcss.com/echarts/3.2.2/echarts.simple.min.js"></script>
+	<script src="https://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+	</head>
+<body>
+		<div id="main" style="width: 100%;height: 400px;"></div>		
+	<script>
+		var myChart = echarts.init(document.getElementById('main'));
+		var comOption = {
+			title: {
+                text: '熊猫主播竹子Top20'
+            },
+		    color: ['#0ec87c'],
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {           
+		            type : 'shadow'       
+		        }
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : [],
+		            axisLabel: {
+		           	    interval: 0,
+		           	    rotate: 340
+		            },
+		        },
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'竹子数',
+		            type:'bar',
+		            barWidth: '60%',
+		            data: []
+		        }
+		    ]
+		};
+
+		var mobileOption = {
+			title: {
+				text: '熊猫主播竹子Top20'
+			},
+			color: ['#0ec87c'],
+		    tooltip: {
+		        trigger: 'axis',
+		        axisPointer: {
+		            type: 'shadow'
+		        }
+		    },
+		    grid: {
+		    	left: '-3%',
+		        containLabel: true
+		    },		  
+		    xAxis: {
+		    	type: 'value'
+		    },
+		    yAxis: {
+
+		    	type: 'category',
+		    	data: [],
+				axisLabel: {
+		           	    interval: 0,
+		           	    rotate: 0
+		            },
+		        inverse: true
+		    },
+		    series: [
+		    	{
+		    		name: '竹子数',
+		    		type: 'bar',
+		    		barWidth: '60%',
+		    		data: []
+		    	}
+		    ]
+		};
+
+		function setData(){
+			$.get('bamboos_rank.json').done(function (data) {
+	    		myChart.setOption({
+		        	xAxis: {
+		            	data: data.name
+		        	},
+		        	series: [{
+		            	name: '竹子数',
+		            	data: data.bamboos
+		        	}]
+	    		});
+			});
+		}
+
+
+		function setDataMobile(){
+			$.get('bamboos_rank.json').done(function (data) {
+	    		myChart.setOption({
+		        	yAxis: {
+		            	data: data.name
+		        	},
+		        	series: [{
+		            	name: '竹子数',
+		            	data: data.bamboos
+		        	}]
+	    		});
+			});
+		}
+
+		if(window.innerWidth < 500) {
+			myChart.setOption(mobileOption);
+			setDataMobile();
+		} else {
+			myChart.setOption(comOption);
+			setData();
+		}
+
+		
+	</script>
+</body>
+</html>
