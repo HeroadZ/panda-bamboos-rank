@@ -5,7 +5,7 @@ python crawl for panda bamboos rank
 这是一个python爬虫。    
 这是用来爬取熊猫主播的竹子数，并进行排序比较。 
 
-v1展示页面： [熊猫TV竹子Top20](http://zuilexuan.com/panda/rank.html)
+v1展示页面： [熊猫TV竹子Top20](http://behappy.cc/extension/panda/rank.html)
 
 ### 项目近况：
 1. 目前做了个v1版本
