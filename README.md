@@ -1,3 +1,8 @@
+--------update 2020/4/24-----------
+
+This project will not be maintained since the bankruptcy of PandaTV
+
+
 # panda-bamboos-rank   
 python crawl for panda bamboos rank    
     
